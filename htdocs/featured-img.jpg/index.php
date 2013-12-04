@@ -1,7 +1,5 @@
 <?php
 
-// Set Header Type
-header('Content-type: image/jpeg');
 
 // Get RSS Content
 $rss = new DOMDocument();
@@ -10,7 +8,8 @@ $feed = array();
 foreach ($rss->getElementsByTagName('item') as $node) {
     $item = array(
         'title' => $node->getElementsByTagName('title')->item(0)->nodeValue,
-        'desc' => $node->getElementsByTagName('encoded')->item(0)->nodeValue,
+        'desc' => $node->getElementsByTagName('description')->item(0)->nodeValue,
+        'img' => $node->getElementsByTagName('image')->item(0)->nodeValue
     );
     array_push($feed, $item);
 }
@@ -18,8 +17,31 @@ foreach ($rss->getElementsByTagName('item') as $node) {
 // Pick Random Entry gyqqkx540
 $random_key = array_rand($feed);
 
+// Determine Image Type
+$image_info = getimagesize($feed[$random_key]['img']);
+$mime = $image_info['mime'];
+
+switch ($mime){
+    case "image/png":
+        header('Content-type: image/png');
+        $featured_image = imagecreatefrompng($feed[$random_key]['img']);
+        imagepng($featured_image);
+        break;
+    case "image/jpeg":
+        header('Content-type: image/jpeg');
+        $featured_image = imagecreatefromjpeg($feed[$random_key]['img']);
+        imagejpeg($featured_image);
+        break;
+    case "image/gif":
+        header('Content-type: image/gif');
+        $featured_image = imagecreatefromgif($feed[$random_key]['img']);
+        imagegif($featured_image);
+        break;
+}
+
+/*
 // Prepare Description String
-preg_match('/<img .*?(?=src)src=\"([^\"]+)\"/si',$feed[$random_key]['desc'], $result);
+preg_match('/<img .*?(?=src)src=\"([^\"]+)\"/si',$feed[$random_key]['content'], $result);
 
 // Determine Image Type
 $image_info = getimagesize($result[1]);
@@ -38,9 +60,7 @@ switch ($mime){
         break;
 }
 
-
 $im = imagecreatetruecolor(285, 250);
-
 
 $thumb_width = 285;
 $thumb_height = 126;
@@ -81,7 +101,6 @@ $text = 'Testing...';
 // Replace path by your own font path
 $font = '../arial.ttf';
 
-
 $black = imagecolorallocate($im, 0, 0, 0);
 
 // Add the text
@@ -91,5 +110,5 @@ imagejpeg($thumb);
 
 // Output Image
 //imagejpeg($featured_image);
-
+*/
 ?>
